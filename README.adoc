@@ -4,77 +4,77 @@
 :author: Greg L. Turnquist
 
 == Introduction
-
-Wayback Image Restorer is a Python tool designed to retrieve archived images from the Wayback Machine, ideal for restoring lost website assets.
+Wayback Image Restorer is a Python tool for retrieving archived images from the Wayback Machine with preserved folder structures.
 
 == Features
-
-* Retrieves archived URLs while preserving folder structures.
-* Implements adaptive rate limiting with exponential backoff.
-* Accepts configurable command-line arguments.
+* Retrieves archived URLs while maintaining folder structures
+* Adaptive rate limiting with exponential backoff
+* Accepts configurable command-line arguments
 
 == Prerequisites
-
 * Python 3.13+
 * `pip` for dependency management
 * `waybackpy` and `requests` libraries
 
 == Installation
-
 . Clone the repository:
-```
++
+[source]
+----
 git clone https://github.com/pro-coder-io/wayback-image-restorer.git
 cd wayback-image-restorer
-```
+----
++
 . Create a virtual environment:
-```
++
+[source]
+----
 python3 -m venv pyenv
 source pyenv/bin/activate
-```
+----
++
 . Install dependencies:
-```
++
+[source]
+----
 pip install -r requirements.txt
-```
+----
 
 == Usage
-
-. Run the script with a base URL:
-```
-./restore-images https://example.com/wp-content/uploads/*
-```
+Run the script with a base domain:
+[source]
+----
+./restore-images --domain example.com
+----
 
 == Design Considerations
-
 * **Rate Limiting:** 5–7 seconds per request, with a 30–60 second break every 15 downloads.
-* **Failure Handling:** Exponential backoff with a 10-minute pause after 3 consecutive failures.
+* **Failure Handling:** Exponential backoff, with a 10-minute pause after 3 consecutive failures.
 * **CLI Interface:** Uses `argparse` for command-line options.
-* **Logging:** Emoji-based status indicators.
+* **Logging Indicators:**
+** ✅ Success
+** ❌ Failure
+** ⚠️ Warning
 
 == Contribution Guide
-
 === Reporting Issues
-
 * Use the GitHub issues page: https://github.com/pro-coder-io/wayback-image-restorer/issues
 
 === Submitting Pull Requests (PRs)
-
-. Fork the repository.
-. Create a feature branch.
-. Add and test changes.
-. Ensure all tests pass.
-. Open a PR with a clear title and summary.
+. Fork the repository
+. Create a feature branch
+. Add and test changes
+. Ensure all tests pass
+. Open a PR with a clear title and description
 
 === Contributor Guidelines
-
-* Follow PEP8 style conventions.
-* Use descriptive commit messages.
-* Document complex logic.
+* Follow PEP8 style conventions
+* Use descriptive commit messages
+* Document complex logic
 
 == License
-
 Licensed under the Apache Software License (ASL) 2.0. See `LICENSE` for details.
 
 == Contact
-
-* Submit inquiries through the GitHub repository.
+* Submit inquiries through the GitHub repository
 
