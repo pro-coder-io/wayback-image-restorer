@@ -1,83 +1,86 @@
 = Wayback Image Restorer
 :toc:
 :icons: font
-:author: Greg Turnquist
-:email: greg.turnquist@example.com
+:author: Greg L. Turnquist
 
 == Introduction
-Wayback Image Restorer is a Python tool that downloads archived images from the Wayback Machine based on a user-defined base URL pattern. This project was designed to help restore missing image assets from a WordPress site using data preserved on web.archive.org.
+
+Wayback Image Restorer is a Python tool for retrieving archived images from the Wayback Machine, ideal for restoring lost website assets.
 
 == Features
-- Fetches archived URLs from the Wayback Machine.
-- Downloads images to a local directory with preserved paths.
-- Implements adaptive rate limiting to avoid triggering blocks.
-- Supports retries with exponential backoff.
-- Configurable via command-line arguments.
+
+* Retrieves archived URLs while maintaining folder structures.
+* Implements adaptive rate limiting with exponential backoff.
+* Accepts configurable command-line arguments.
 
 == Prerequisites
-- Python 3.13+
-- `pip` (Python package installer)
-- `waybackpy` and `requests` libraries
+
+* Python 3.13+
+* `pip` for dependency management
+* `waybackpy` and `requests` libraries
 
 == Installation
+
 . Clone the repository:
-   ```bash
-   git clone https://github.com/gregturn/wayback-image-restorer.git
-   cd wayback-image-restorer
-   ```
+
+```
+git clone https://github.com/pro-coder-io/wayback-image-restorer.git
+cd wayback-image-restorer
+```
+
 . Create a virtual environment:
-   ```bash
-   python3 -m venv pyenv
-   source pyenv/bin/activate
-   ```
+
+```
+python3 -m venv pyenv
+source pyenv/bin/activate
+```
+
 . Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+
+```
+pip install -r requirements.txt
+```
 
 == Usage
-Run the script with a specified base URL:
-```bash
+
+. Run the script with a base URL:
+
+```
 ./restore-images https://example.com/wp-content/uploads/*
 ```
 
 == Design Considerations
-=== Rate Limiting and Backoff
-- *Initial Wait Time:* 5-7 seconds between requests.
-- *Normal Wait Time:* 5-7 seconds once stable.
-- *Break Every 15 Downloads:* 30-60 seconds pause to avoid triggering Wayback Machine rate limits.
-- *Failure Handling:* Exponential backoff and a 10-minute pause after 3 consecutive failures.
 
-=== Command-Line Interface (CLI)
-- Introduced argument parsing using `argparse`.
-- Removed hard-coded base URL, making the script more reusable.
+* **Rate Limiting:** 5–7 seconds per request, 30–60 second break every 15 downloads.
+* **Failure Handling:** Exponential backoff with a 10-minute pause after 3 consecutive failures.
+* **CLI Interface:** Uses `argparse` for command-line options.
+* **Logging:** Emoji-based status indicators.
 
-=== Logging and Feedback
-- ASCII icons for status: ✅ success, ❌ failure, ⚠️ warning.
-- Prints detailed logs for each download attempt and retry.
-
-== Contribution
-We welcome contributions from the community! Here’s how you can help:
+== Contribution Guide
 
 === Reporting Issues
-- Open an issue on GitHub: https://github.com/gregturn/wayback-image-restorer/issues
-- Provide a detailed description, including error logs if applicable.
+
+* Use the GitHub issues page: https://github.com/pro-coder-io/wayback-image-restorer/issues
 
 === Submitting Pull Requests (PRs)
+
 . Fork the repository.
-. Create a feature branch from `main`.
-. Add tests for any new functionality.
-. Run tests and ensure they pass.
-. Submit a pull request with a descriptive title and summary.
+. Create a feature branch.
+. Add and test changes.
+. Ensure all tests pass.
+. Open a PR with a clear title and summary.
 
 === Contributor Guidelines
-- Follow PEP8 style guidelines for Python code.
-- Use descriptive commit messages.
-- Include comments explaining non-trivial logic.
+
+* Follow PEP8 style conventions.
+* Use descriptive commit messages.
+* Document complex logic.
 
 == License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+Licensed under the Apache Software License (ASL) 2.0. See `LICENSE` for details.
 
 == Contact
-For questions or support, reach out to Greg Turnquist via email at greg.turnquist@example.com.
+
+* Submit inquiries through the GitHub repository.
 
