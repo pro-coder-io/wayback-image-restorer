@@ -1,98 +1,83 @@
 = Wayback Image Restorer
 :toc:
 :icons: font
-:author: Greg L. Turnquist
+:author: Greg Turnquist
+:email: greg.turnquist@example.com
 
 == Introduction
 Wayback Image Restorer is a Python tool that downloads archived images from the Wayback Machine based on a user-defined base URL pattern. This project was designed to help restore missing image assets from a WordPress site using data preserved on web.archive.org.
 
 == Features
-
-Fetches archived URLs from the Wayback Machine.
-
-Downloads images to a local directory with preserved paths.
-
-Implements adaptive rate limiting to avoid triggering blocks.
-
-Supports retries with exponential backoff.
-
-Configurable via command-line arguments.
+- Fetches archived URLs from the Wayback Machine.
+- Downloads images to a local directory with preserved paths.
+- Implements adaptive rate limiting to avoid triggering blocks.
+- Supports retries with exponential backoff.
+- Configurable via command-line arguments.
 
 == Prerequisites
-
-Python 3.13+
-
-pip (Python package installer)
-
-waybackpy and requests libraries
+- Python 3.13+
+- `pip` (Python package installer)
+- `waybackpy` and `requests` libraries
 
 == Installation
 . Clone the repository:
-
-git clone https://github.com/gregturn/wayback-image-restorer.git
-cd wayback-image-restorer
-
+   ```bash
+   git clone https://github.com/gregturn/wayback-image-restorer.git
+   cd wayback-image-restorer
+   ```
 . Create a virtual environment:
-
-python3 -m venv pyenv
-source pyenv/bin/activate
-
+   ```bash
+   python3 -m venv pyenv
+   source pyenv/bin/activate
+   ```
 . Install dependencies:
-
-pip install -r requirements.txt
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 == Usage
 Run the script with a specified base URL:
-
+```bash
 ./restore-images https://example.com/wp-content/uploads/*
+```
 
 == Design Considerations
 === Rate Limiting and Backoff
-
-Initial Wait Time: 5-7 seconds between requests.
-
-Normal Wait Time: 5-7 seconds once stable.
-
-Break Every 15 Downloads: 30-60 seconds pause to avoid triggering Wayback Machine rate limits.
-
-Failure Handling: Exponential backoff and a 10-minute pause after 3 consecutive failures.
+- *Initial Wait Time:* 5-7 seconds between requests.
+- *Normal Wait Time:* 5-7 seconds once stable.
+- *Break Every 15 Downloads:* 30-60 seconds pause to avoid triggering Wayback Machine rate limits.
+- *Failure Handling:* Exponential backoff and a 10-minute pause after 3 consecutive failures.
 
 === Command-Line Interface (CLI)
-
-Introduced argument parsing using argparse.
-
-Removed hard-coded base URL, making the script more reusable.
+- Introduced argument parsing using `argparse`.
+- Removed hard-coded base URL, making the script more reusable.
 
 === Logging and Feedback
-
-ASCII icons for status: ✅ success, ❌ failure, ⚠️ warning.
-
-Prints detailed logs for each download attempt and retry.
+- ASCII icons for status: ✅ success, ❌ failure, ⚠️ warning.
+- Prints detailed logs for each download attempt and retry.
 
 == Contribution
 We welcome contributions from the community! Here’s how you can help:
 
 === Reporting Issues
-
-Open an issue on GitHub: https://github.com/gregturn/wayback-image-restorer/issues
-
-Provide a detailed description, including error logs if applicable.
+- Open an issue on GitHub: https://github.com/gregturn/wayback-image-restorer/issues
+- Provide a detailed description, including error logs if applicable.
 
 === Submitting Pull Requests (PRs)
 . Fork the repository.
-. Create a feature branch from main.
+. Create a feature branch from `main`.
 . Add tests for any new functionality.
 . Run tests and ensure they pass.
 . Submit a pull request with a descriptive title and summary.
 
 === Contributor Guidelines
-
-Follow PEP8 style guidelines for Python code.
-
-Use descriptive commit messages.
-
-Include comments explaining non-trivial logic.
+- Follow PEP8 style guidelines for Python code.
+- Use descriptive commit messages.
+- Include comments explaining non-trivial logic.
 
 == License
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+== Contact
+For questions or support, reach out to Greg Turnquist via email at greg.turnquist@example.com.
 
