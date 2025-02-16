@@ -1,0 +1,142 @@
+#!/usr/bin/env python
+
+import os
+import time
+import random
+import argparse
+import requests
+from urllib.parse import urlparse
+from waybackpy import WaybackMachineCDXServerAPI
+
+SAVE_DIR = "restored_files"
+
+SUCCESS_ICON = "✅"
+FAIL_ICON = "❌"
+WARNING_ICON = "⚠️"
+
+# **Increased base wait time (was 4-5 sec, now 5-7 sec)**
+INITIAL_MIN_WAIT = 5  
+INITIAL_MAX_WAIT = 7  
+NORMAL_MIN_WAIT = 5  
+NORMAL_MAX_WAIT = 7  
+
+BLOCK_WAIT_TIME = 600  # 10-minute pause if we hit too many failures
+
+# Adaptive rate control
+success_count = 0
+failure_streak = 0
+MAX_FAILURE_STREAK = 3  
+
+MAX_RETRIES = 5  
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+}
+
+def get_archived_urls():
+    """Retrieve archived image URLs from Wayback Machine."""
+    cdx = WaybackMachineCDXServerAPI(BASE_URL)
+    snapshots = cdx.snapshots()
+    return [snap.archive_url for snap in snapshots if snap.archive_url]
+
+def download_file(url, save_path):
+    """Download an image with adaptive rate limiting and retry logic."""
+    global success_count, failure_streak
+
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    # Skip if already downloaded
+    if os.path.exists(save_path):
+        print(f"{SUCCESS_ICON} Already exists, skipping: {save_path}")
+        return False  # **Indicates no need to wait**
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            response = requests.get(url, stream=True, timeout=10, headers=HEADERS)
+
+            # Handle rate limit (429 Too Many Requests)
+            if response.status_code == 429:
+                retry_after = int(response.headers.get("Retry-After", BLOCK_WAIT_TIME))
+                print(f"{WARNING_ICON} Rate limit hit! Waiting {retry_after} seconds...")
+                time.sleep(retry_after)
+                continue  
+
+            if response.status_code == 200:
+                with open(save_path, "wb") as f:
+                    for chunk in response.iter_content(1024):
+                        f.write(chunk)
+                print(f"{SUCCESS_ICON} Downloaded: {url} -> {save_path}")
+                
+                success_count += 1
+                failure_streak = 0  # Reset failure counter
+                return True  # **Indicates a successful download, so we need to wait**
+
+            print(f"{FAIL_ICON} Failed (Attempt {attempt}): {url} (Status: {response.status_code})")
+
+        except requests.ConnectionError:
+            print(f"{FAIL_ICON} Connection Error (Attempt {attempt}): {url}")
+        except requests.Timeout:
+            print(f"{FAIL_ICON} Timeout (Attempt {attempt}): {url}")
+
+        failure_streak += 1
+        sleep_time = (2 ** attempt) + random.uniform(1, 3)
+        print(f"{WARNING_ICON} Retrying in {sleep_time:.2f} seconds...")
+        time.sleep(sleep_time)
+
+    print(f"{FAIL_ICON} Giving up after {MAX_RETRIES} attempts: {url}")
+
+    # If too many failures, pause to avoid full block
+    if failure_streak >= MAX_FAILURE_STREAK:
+        print(f"{WARNING_ICON} Too many failures in a row! Pausing for {BLOCK_WAIT_TIME} seconds...")
+        time.sleep(BLOCK_WAIT_TIME)
+        failure_streak = 0  
+
+    return True  # Treat as a failed download but still requires a delay
+
+def restore_images():
+    """Download archived images with adaptive rate limiting."""
+    archived_image_urls = get_archived_urls()
+    
+    print(f"\n{WARNING_ICON} Found {len(archived_image_urls)} images to restore.\n")
+    input(f"{WARNING_ICON} Press Enter to start downloading...\n")  
+
+    for image_url in archived_image_urls:
+        original_path = urlparse(image_url).path
+        if original_path.startswith("/web/"):
+            original_path = "/".join(original_path.split("/")[4:])  
+        save_path = os.path.join(SAVE_DIR, original_path.lstrip("/"))
+        
+        downloaded = download_file(image_url, save_path)
+
+        # **Only wait if an actual download happened**
+        if downloaded:
+            if success_count % 15 == 0:  # **NEW: Take a short break every 15 downloads**
+                break_time = random.uniform(30, 60)
+                print(f"{WARNING_ICON} Taking a short break for {break_time:.2f} seconds...")
+                time.sleep(break_time)
+
+            if success_count < 10:
+                sleep_time = random.uniform(INITIAL_MIN_WAIT, INITIAL_MAX_WAIT)  
+            else:
+                sleep_time = random.uniform(NORMAL_MIN_WAIT, NORMAL_MAX_WAIT)
+
+            print(f"{WARNING_ICON} Waiting {sleep_time:.2f} seconds before next request...")
+            time.sleep(sleep_time)
+
+if __name__ == "__main__":
+    # Command-line argument parser
+    parser = argparse.ArgumentParser(description="Restore images from Wayback Machine.")
+    parser.add_argument(
+        "--domain",
+        type=str,
+        required=True,
+        help="Domain to restore images from (e.g., 'example.com')."
+    )
+    args = parser.parse_args()
+
+    # Construct BASE_URL from the domain argument
+    global BASE_URL
+    BASE_URL = f"https://{args.domain}/wp-content/uploads/*"
+
+    # Call the primary restore function
+    restore_images()
