@@ -5,11 +5,11 @@
 
 == Introduction
 
-Wayback Image Restorer is a Python tool for retrieving archived images from the Wayback Machine, ideal for restoring lost website assets.
+Wayback Image Restorer is a Python tool designed to retrieve archived images from the Wayback Machine, ideal for restoring lost website assets.
 
 == Features
 
-* Retrieves archived URLs while maintaining folder structures.
+* Retrieves archived URLs while preserving folder structures.
 * Implements adaptive rate limiting with exponential backoff.
 * Accepts configurable command-line arguments.
 
@@ -22,21 +22,16 @@ Wayback Image Restorer is a Python tool for retrieving archived images from the 
 == Installation
 
 . Clone the repository:
-
 ```
 git clone https://github.com/pro-coder-io/wayback-image-restorer.git
 cd wayback-image-restorer
 ```
-
 . Create a virtual environment:
-
 ```
 python3 -m venv pyenv
 source pyenv/bin/activate
 ```
-
 . Install dependencies:
-
 ```
 pip install -r requirements.txt
 ```
@@ -44,14 +39,13 @@ pip install -r requirements.txt
 == Usage
 
 . Run the script with a base URL:
-
 ```
 ./restore-images https://example.com/wp-content/uploads/*
 ```
 
 == Design Considerations
 
-* **Rate Limiting:** 5–7 seconds per request, 30–60 second break every 15 downloads.
+* **Rate Limiting:** 5–7 seconds per request, with a 30–60 second break every 15 downloads.
 * **Failure Handling:** Exponential backoff with a 10-minute pause after 3 consecutive failures.
 * **CLI Interface:** Uses `argparse` for command-line options.
 * **Logging:** Emoji-based status indicators.
