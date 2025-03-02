@@ -50,6 +50,12 @@ def download_file(url, save_path):
         print(f"{SUCCESS_ICON} Already exists, skipping: {save_path}")
         return False  # **Indicates no need to wait**
 
+    # Detect and skip malformed URLs with duplicate domain occurrences
+    domain_count = url.lower().count(TARGET_DOMAIN.lower())
+    if domain_count > 1:
+        print(f"{FAIL_ICON} Skipping malformed URL (multiple domain occurrences): {url}")
+        return False  # **No need to wait, just move on**
+
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             response = requests.get(url, stream=True, timeout=10, headers=HEADERS)
@@ -135,7 +141,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Construct BASE_URL from the domain argument
-    global BASE_URL
+    global BASE_URL, TARGET_DOMAIN
+    TARGET_DOMAIN = args.domain
     BASE_URL = f"https://{args.domain}/wp-content/uploads/*"
 
     # Call the primary restore function
