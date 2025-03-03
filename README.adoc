@@ -7,16 +7,19 @@
 Wayback Image Restorer is a Python tool for retrieving archived images from the Wayback Machine with preserved folder structures.
 
 == Features
+
 * Retrieves archived URLs while maintaining folder structures
 * Adaptive rate limiting with exponential backoff
 * Accepts configurable command-line arguments
 
 == Prerequisites
+
 * Python 3.13+
 * `pip` for dependency management
 * `waybackpy` and `requests` libraries
 
 == Installation
+
 . Clone the repository:
 +
 [source]
@@ -41,13 +44,43 @@ pip install -r requirements.txt
 ----
 
 == Usage
+
 Run the script with a base domain:
+
 [source]
 ----
 ./restore-images --domain example.com
 ----
 
+== Supplemental Tool: File Verification Utility
+
+This repository also includes a **File Verification Tool** to ensure that the downloaded images, PDFs, videos, and audio files are valid and not corrupted.
+
+=== Features
+
+* Checks **image, PDF, video, and MP3 files** using their **magic numbers (file signatures)**.
+* **Deep validation** for MP4 files, ensuring compatibility with various encoding formats.
+* Provides **debug information** for failed files, including file size and hex headers.
+* Skips macOS `.DS_Store` files.
+
+=== Usage
+
+To verify downloaded files:
+
+[source]
+----
+./verify-images --directory /path/to/files
+----
+
+Or scan the current directory by default:
+
+[source]
+----
+./verify-images
+----
+
 == Design Considerations
+
 * **Rate Limiting:** 5–7 seconds per request, with a 30–60 second break every 15 downloads.
 * **Failure Handling:** Exponential backoff, with a 10-minute pause after 3 consecutive failures.
 * **CLI Interface:** Uses `argparse` for command-line options.
@@ -57,10 +90,13 @@ Run the script with a base domain:
 ** ⚠️ Warning
 
 == Contribution Guide
+
 === Reporting Issues
+
 * Use the GitHub issues page: https://github.com/pro-coder-io/wayback-image-restorer/issues
 
 === Submitting Pull Requests (PRs)
+
 . Fork the repository
 . Create a feature branch
 . Add and test changes
@@ -68,13 +104,15 @@ Run the script with a base domain:
 . Open a PR with a clear title and description
 
 === Contributor Guidelines
+
 * Follow PEP8 style conventions
 * Use descriptive commit messages
 * Document complex logic
 
 == License
+
 Licensed under the Apache Software License (ASL) 2.0. See `LICENSE` for details.
 
 == Contact
-* Submit inquiries through the GitHub repository
 
+* Submit inquiries through the GitHub repository

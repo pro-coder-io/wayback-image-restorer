@@ -1,0 +1,139 @@
+#!/usr/bin/env python
+
+"""
+File Verification Tool
+======================
+
+This script scans a directory to verify the integrity of image, PDF, video,
+and MP3 files by checking their magic numbers (file signatures). It detects
+common file formats and identifies invalid or potentially corrupted files.
+
+Supported Formats:
+- Images: JPEG, PNG, GIF, BMP, WebP
+- PDFs: PDF
+- Videos: MP4, MKV, AVI, MOV, WEBM
+- Audio: MP3
+
+Features:
+- Reads the first 32 bytes of each file to check for known magic numbers.
+- Performs a **deeper check** for MP4 files, detecting variations with `ftyp` headers.
+- Ignores macOS `.DS_Store` files.
+- Prints `[OK]` for valid files and `[WARNING]` for unrecognized ones.
+- Provides **debug information** (file size & hex header) for failed files.
+
+Usage:
+- Run for the current directory (default):
+    ./verify-images
+- Run for a specific directory:
+    ./verify-images --directory /path/to/files
+
+If a file fails validation, check the debug output for details.
+
+Author: Greg L. Turnquist (w/ assistance from ChatGPT)
+"""
+
+import os
+import argparse
+import binascii
+
+# Define known file signatures (magic numbers)
+FILE_SIGNATURES = {
+    # Image Formats
+    b'\xFF\xD8\xFF': 'JPEG',
+    b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A': 'PNG',
+    b'\x47\x49\x46\x38\x37\x61': 'GIF',  # GIF87a
+    b'\x47\x49\x46\x38\x39\x61': 'GIF',  # GIF89a
+    b'\x42\x4D': 'BMP',
+    b'\x52\x49\x46\x46': 'WEBP',  # WebP (RIFF header)
+
+    # PDF
+    b'\x25\x50\x44\x46': 'PDF',  # "%PDF"
+
+    # Video Formats
+    b'\x00\x00\x00\x18\x66\x74\x79\x70': 'MP4',  # Standard MP4
+    b'\x00\x00\x00\x14\x66\x74\x79\x70': 'MP4',  # Alternate MP4
+    b'\x00\x00\x00\x20\x66\x74\x79\x70': 'MP4',  # Large MP4 metadata
+    b'\x66\x74\x79\x70': 'MP4',  # General MP4 type
+    b'\x1A\x45\xDF\xA3': 'MKV',  # MKV (Matroska)
+    b'\x52\x49\x46\x46': 'AVI',  # AVI (RIFF header)
+    b'\x1A\x45\xDF\xA3': 'WEBM',  # WEBM (same signature as MKV)
+    b'\x00\x00\x00\x14\x66\x74\x79\x70\x71\x74': 'MOV',  # MOV (QuickTime)
+
+    # Audio Format
+    b'\xFF\xFB': 'MP3',  # MP3 (without ID3v2 header)
+    b'\x49\x44\x33': 'MP3'  # MP3 (with ID3v2 header)
+}
+
+def check_magic_number(file_path):
+    """Check if a file has a valid magic number for images, PDFs, videos, or MP3s."""
+    try:
+        with open(file_path, 'rb') as f:
+            file_header = f.read(32)  # Read the first 32 bytes
+
+        # Check against known file signatures
+        for magic, file_type in FILE_SIGNATURES.items():
+            if file_header.startswith(magic):
+                return file_type
+
+        # Special deep check for MP4 files
+        if b'ftyp' in file_header:
+            return "MP4 (Deep Check Passed)"
+
+        return None  # Not a recognized file format
+
+    except Exception as e:
+        return f"Error reading file: {e}"
+
+def scan_directory(directory):
+    """Scan all files in a directory and verify file formats."""
+    invalid_files = []
+
+    for root, _, files in os.walk(directory):
+        for filename in files:
+            if filename == ".DS_Store":  # Ignore macOS system files
+                continue
+
+            file_path = os.path.join(root, filename)
+            result = check_magic_number(file_path)
+
+            if result:
+                print(f"[OK] {filename}: {result}")
+            else:
+                print(f"[WARNING] {filename}: Not a valid image, PDF, video, or MP3!")
+                invalid_files.append(file_path)
+                debug_file(file_path)
+
+    if invalid_files:
+        print("\n[!] Invalid files detected:")
+        for f in invalid_files:
+            print(f"  - {f}")
+
+def debug_file(file_path):
+    """Prints debug info for files that fail validation."""
+    try:
+        file_size = os.path.getsize(file_path)
+        with open(file_path, 'rb') as f:
+            file_header = f.read(32)  # Read first 32 bytes
+
+        print(f"\n[DEBUG] File: {file_path}")
+        print(f"  - Size: {file_size} bytes")
+        print(f"  - First 32 bytes (hex): {binascii.hexlify(file_header)}")
+
+        if b'ftyp' in file_header:
+            print("  - [INFO] Detected 'ftyp' box, likely an MP4 file.")
+
+    except Exception as e:
+        print(f"  - Error reading file: {e}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Verify images, PDFs, videos, and MP3s by checking their magic numbers.")
+    parser.add_argument(
+        "--directory",
+        type=str,
+        default=".",  # Default to current directory
+        help="Path to the directory containing files (default: current directory)."
+    )
+    args = parser.parse_args()
+
+    # Scan the specified directory
+    scan_directory(args.directory)
